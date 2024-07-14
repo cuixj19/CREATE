@@ -51,27 +51,28 @@ class Encoder1(nn.Module):
     def __init__(self, multi, channel1):
         super().__init__()
         self.multi = multi
+        sub_channel1 = channel1 // (len(self.multi)+1) if 'seq' in self.multi else channel1 // len(self.multi)
         self.conv1 = torch.nn.Sequential(
-            nn.Conv1d(4, out_channels=channel1 // 2, kernel_size=8, stride=1),
+            nn.Conv1d(4, out_channels=sub_channel1 * 2, kernel_size=8, stride=1),
             nn.ReLU(inplace=True),
             nn.MaxPool1d(kernel_size=5, stride=4),
             nn.Dropout(0.1),
         )
-        self.layernorm1 = nn.LayerNorm(channel1 // 2)
+        self.layernorm1 = nn.LayerNorm(sub_channel1 * 2)
         self.conv11 = torch.nn.Sequential(
-            nn.Conv1d(1, out_channels=channel1 // 4, kernel_size=8, stride=1),
+            nn.Conv1d(1, out_channels=sub_channel1, kernel_size=8, stride=1),
             nn.ReLU(inplace=True),
             nn.MaxPool1d(kernel_size=5, stride=4),
             nn.Dropout(0.1),
         )
-        self.layernorm11 = nn.LayerNorm(channel1 // 4)
+        self.layernorm11 = nn.LayerNorm(sub_channel1)
         self.conv12 = torch.nn.Sequential(
-            nn.Conv1d(1, out_channels=channel1 // 4, kernel_size=8, stride=1),
+            nn.Conv1d(1, out_channels=sub_channel1, kernel_size=8, stride=1),
             nn.ReLU(inplace=True),
             nn.MaxPool1d(kernel_size=5, stride=4),
             nn.Dropout(0.1),
         )
-        self.layernorm12 = nn.LayerNorm(channel1 // 4)
+        self.layernorm12 = nn.LayerNorm(sub_channel1)
         self.conv = torch.nn.Sequential(
             nn.Conv1d(channel1, out_channels=channel1, kernel_size=1, stride=1),
             nn.ReLU(inplace=True),
