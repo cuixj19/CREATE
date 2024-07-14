@@ -15,7 +15,7 @@ Requiements:
   
 Package installation:
 
-$ git clone https://github.com//cuixj19/CREATE.git       
+$ git clone https://github.com/cuixj19/CREATE.git       
 ```
 
 ## Tutorial
