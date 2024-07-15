@@ -1,4 +1,4 @@
-# Cis-Regulatory Elements identificAtion via discreTe Embedding
+# CREATE: Cis-Regulatory Elements identificAtion via discreTe Embedding
 
 ![](docs/CREATE.png)
 
