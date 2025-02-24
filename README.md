@@ -1,6 +1,6 @@
 # CREATE: Cis-Regulatory Elements identificAtion via discreTe Embedding
 
-![](docs/CREATE.png)
+![](CREATE.png)
 
 ## Installation  
 
@@ -19,7 +19,7 @@ $ git clone https://github.com/cuixj19/CREATE.git
 ```
 
 ## Tutorial
-We provide a [quick-start notebook](https://github.com/cuixj19/CREATE/blob/main/demo.ipynb) for the training, evaluation and visualization of CREATE.
+We provide a [quick-start notebook](https://github.com/cuixj19/CREATE/blob/main/example/example.ipynb) for the training, evaluation and visualization of CREATE.
 
 
 ## Run   
