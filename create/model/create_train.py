@@ -25,6 +25,8 @@ def CREATE_train(
         max_epoch=300, 
         pre_epoch=50, 
         multi=['seq','open','loop'], 
+        aug=2, 
+        cls=5, 
         open_loss_weight=0.01, 
         loop_loss_weight=0.1, 
         outdir='./output/', 
@@ -138,7 +140,7 @@ def CREATE_train(
                     output, x0, _, _, _, _ = clf(b_x0.to(device))
                     valid_out.extend(F.softmax(output, 1).cpu().detach().numpy())
                 valid_out = np.array(valid_out)
-                valid_score = get_mean_score(valid_label, valid_out)
+                valid_score = get_mean_score(valid_label, valid_out, aug=aug, cls=cls)
                 valid_pre = [list(x).index(max(x)) for x in valid_score]
                 valid_prc = metrics.average_precision_score(valid_labels, valid_score)
 
@@ -146,7 +148,7 @@ def CREATE_train(
                     output, _, _, _, _, _ = clf(b_x0.to(device))
                     test_out.extend(F.softmax(output, 1).cpu().detach().numpy())
                 test_out = np.array(test_out)
-                test_score = get_mean_score(test_label, test_out)
+                test_score = get_mean_score(test_label, test_out, aug=aug, cls=cls)
                 test_pre = [list(x).index(max(x)) for x in test_score]
 
             if epoch >= pre_epoch:
