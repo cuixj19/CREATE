@@ -134,6 +134,7 @@ def CREATE(
                  pre_epoch=pre_epoch, 
                  multi=multi, 
                  aug=test_aug*2, 
+                 cls=num_class, 
                  open_loss_weight=open_loss_weight, 
                  loop_loss_weight=loop_loss_weight, 
                  outdir=outdir,
