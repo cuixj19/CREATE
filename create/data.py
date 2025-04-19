@@ -89,10 +89,12 @@ def load_data(
     data0, data_id, label = data_aug(valid_data[valid_labels==0], valid_data[valid_labels==1], valid_data[valid_labels==2], valid_data[valid_labels==3], valid_data[valid_labels==4], augs=[test_aug]*num_class, stride=stride, multi=multi)
     valid_set = TensorDataset(torch.Tensor(data0), torch.Tensor(label), torch.Tensor(data_id))
     valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, pin_memory=True, num_workers=4)
+    valid_labels = np.array([0]*sum(valid_labels==0) + [1]*sum(valid_labels==1) + [2]*sum(valid_labels==2) + [3]*sum(valid_labels==3) + [4]*sum(valid_labels==4))
     
     data0, data_id, label = data_aug(test_data[test_labels==0], test_data[test_labels==1], test_data[test_labels==2], test_data[test_labels==3], test_data[test_labels==4], augs=[test_aug]*num_class, stride=stride, multi=multi)
     test_set = TensorDataset(torch.Tensor(data0), torch.Tensor(label), torch.Tensor(data_id))
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, pin_memory=True, num_workers=4)
+    test_labels = np.array([0]*sum(test_labels==0) + [1]*sum(test_labels==1) + [2]*sum(test_labels==2) + [3]*sum(test_labels==3) + [4]*sum(test_labels==4))
     if log: log.info('Data loading completed!')
     
     return train_loader, valid_loader, test_loader, valid_labels, test_labels
