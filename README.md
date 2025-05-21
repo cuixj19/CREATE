@@ -1,4 +1,4 @@
-# CREATE: Cis-Regulatory Elements identificAtion via discreTe Embedding
+# CREATE: Cis-Regulatory Element identificAtion via discreTe Embedding
 
 ![](CREATE.png)
 
@@ -77,6 +77,10 @@ $ python CREATE.py -d input_file -o output_dir
     outdir, -o
         Output directory. Default: './output/'.
 ```
+
+
+## Citation
+Xuejian Cui, Xiaoyang Chen, Zhen Li, Zijing Gao, Shengquan Chen & Rui Jiang. CREATE: cell-type-specific cis-regulatory element identification via discrete embedding. Nature Communications 16, 4607 (2025). <https://www.nature.com/articles/s41467-025-59780-5>
 
 
 ## Contact 
