@@ -55,6 +55,10 @@ def CREATE_train(
         Pre-epochs for training before incorporating the classification loss. Default: 50.
     multi
         Multimodal data used as input in the model. Default: ['seq','open','loop'].
+    aug
+        Augmentation for CREs during testing process. Default: 2.
+    cls
+        The number of types of CREs. Default: 5.
     open_loss_weight
         The weight of reconstruction open loss. Default: 0.01.
     loop_loss_weight
