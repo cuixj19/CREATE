@@ -118,6 +118,7 @@ def CREATE(
     )
     
     channel1, channel2, channel3 = enc_dims
+    channel1 = channel3 * (len(multi)+1) if 'seq' in multi else channel3 * len(multi)
     channel4, channel5 = dec_dims
     clf = create(num_class=num_class, multi=multi, channel1=channel1, channel2=channel2, channel3=channel3, channel4=channel4, channel5=channel5, embed_dim=embed_dim, n_embed=n_embed, split=split, ema=ema, e_loss_weight=e_loss_weight, mu=mu)
 #     log.info('model\n'+clf.__repr__())
@@ -140,5 +141,4 @@ def CREATE(
                  outdir=outdir,
                  device=device
                 )
-
 
