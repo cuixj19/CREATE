@@ -26,11 +26,11 @@ def load_data(
     data_path
         A path of DNA sequence (chromatin accessibility and chromatin interaction data).
     num_class
-        The number of types of CREs. Default: 1.
+        The number of types of CREs. Default: 5.
     multi
         Multimodal data used as input in the model. Default: ['seq','open','loop'].
     test_aug
-        Augmentation for CREs during testing process. Default: 5.
+        Augmentation for CREs during testing process. Default: 1.
     train_aug
         Augmentation for each kind of CREs during training process. Default: [1,1,1,1,1].
     stride
@@ -82,55 +82,41 @@ def load_data(
     test_data = np.concatenate(test_data, axis=1)
     if log: log.info('The shape of input data: {}'.format(train_data.shape[1:]))
     
-    data0, data_id, label = data_aug(train_data[train_labels==0], train_data[train_labels==1], train_data[train_labels==2], train_data[train_labels==3], train_data[train_labels==4], augs=train_aug, stride=stride, multi=multi)
+    data0, data_id, label = data_aug(train_data, train_labels, cls=num_class, augs=train_aug, stride=stride, multi=multi)
     train_set = TensorDataset(torch.Tensor(data0), torch.Tensor(label), torch.Tensor(data_id))
     train_loader = DataLoader(train_set, batch_size=batch_size, drop_last=True, shuffle=True, pin_memory=True, num_workers=4)
     
-    data0, data_id, label = data_aug(valid_data[valid_labels==0], valid_data[valid_labels==1], valid_data[valid_labels==2], valid_data[valid_labels==3], valid_data[valid_labels==4], augs=[test_aug]*num_class, stride=stride, multi=multi)
+    data0, data_id, label = data_aug(valid_data, valid_labels, cls=num_class, augs=[test_aug]*num_class, stride=stride, multi=multi)
     valid_set = TensorDataset(torch.Tensor(data0), torch.Tensor(label), torch.Tensor(data_id))
     valid_loader = DataLoader(valid_set, batch_size=batch_size, shuffle=False, pin_memory=True, num_workers=4)
-    valid_labels = np.array([0]*sum(valid_labels==0) + [1]*sum(valid_labels==1) + [2]*sum(valid_labels==2) + [3]*sum(valid_labels==3) + [4]*sum(valid_labels==4))
+    valid_labels.sort()
     
-    data0, data_id, label = data_aug(test_data[test_labels==0], test_data[test_labels==1], test_data[test_labels==2], test_data[test_labels==3], test_data[test_labels==4], augs=[test_aug]*num_class, stride=stride, multi=multi)
+    data0, data_id, label = data_aug(test_data, test_labels, cls=num_class, augs=[test_aug]*num_class, stride=stride, multi=multi)
     test_set = TensorDataset(torch.Tensor(data0), torch.Tensor(label), torch.Tensor(data_id))
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, pin_memory=True, num_workers=4)
-    test_labels = np.array([0]*sum(test_labels==0) + [1]*sum(test_labels==1) + [2]*sum(test_labels==2) + [3]*sum(test_labels==3) + [4]*sum(test_labels==4))
+    test_labels.sort()
     if log: log.info('Data loading completed!')
     
     return train_loader, valid_loader, test_loader, valid_labels, test_labels
 
-def data_aug(s_all, e_all, p_all, i_all, b_all, augs=[5]*5, stride=10, multi=['seq','open','loop']):
-    s_alls, s_num = load_all(s_all, aug=augs[0], stride=stride, multi=multi)
-    e_alls, e_num = load_all(e_all, aug=augs[1], stride=stride, multi=multi)
-    p_alls, p_num = load_all(p_all, aug=augs[2], stride=stride, multi=multi)
-    i_alls, i_num = load_all(i_all, aug=augs[3], stride=stride, multi=multi)
-    b_alls, b_num = load_all(b_all, aug=augs[4], stride=stride, multi=multi)
-    
+def data_aug(datas, labels, cls=5, augs=[5]*5, stride=10, multi=['seq','open','loop']):
     data0 = []
     data_id = []
-    num_s, num_e, num_p, num_i, num_b = 0, 0, 0, 0, 0
-    for i in range(len(s_alls)):
-        num_s += len(s_alls[i])
-        data0.extend(s_alls[i])
-        data_id.extend([i] * len(s_alls[i]))
-    for i in range(len(e_alls)):
-        num_e += len(e_alls[i])
-        data0.extend(e_alls[i])
-        data_id.extend([i] * len(e_alls[i]))
-    for i in range(len(p_alls)):
-        num_p += len(p_alls[i])
-        data0.extend(p_alls[i])
-        data_id.extend([i] * len(p_alls[i]))
-    for i in range(len(i_alls)):
-        num_i += len(i_alls[i])
-        data0.extend(i_alls[i])
-        data_id.extend([i] * len(i_alls[i]))
-    for i in range(len(b_alls)):
-        num_b += len(b_alls[i])
-        data0.extend(b_alls[i])
-        data_id.extend([i] * len(b_alls[i]))
+    num_all = []
+    for j in range(cls):
+        s_alls, s_num = load_all(datas[labels==j], aug=augs[j], stride=stride, multi=multi)
+        num_s = 0
+        for i in range(len(s_alls)):
+            num_s += len(s_alls[i])
+            data0.extend(s_alls[i])
+            data_id.extend([i] * len(s_alls[i]))
+        num_all.append(num_s)
+    
+    label = []
+    for j in range(cls):
+        label += [j] * num_all[j]
+    label = np.array(label)
     data_id = np.array(data_id)
-    label = np.array([0] * num_s + [1] * num_e + [2] * num_p + [3] * num_i + [4] * num_b)
     
     return data0, data_id, label
 
@@ -170,4 +156,3 @@ def split(s, aug=5, stride=10, multi=['seq','open','loop']):
             ss.append(s[:,mid-j*stride-w2:mid-j*stride+w2][ids,::-1])
             ss.append(s[:,mid+j*stride-w2:mid+j*stride+w2][ids,::-1])
     return ss
-
