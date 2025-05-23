@@ -52,27 +52,30 @@ class Encoder1(nn.Module):
         super().__init__()
         self.multi = multi
         sub_channel1 = channel1 // (len(self.multi)+1) if 'seq' in self.multi else channel1 // len(self.multi)
-        self.conv1 = torch.nn.Sequential(
-            nn.Conv1d(4, out_channels=sub_channel1 * 2, kernel_size=8, stride=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool1d(kernel_size=5, stride=4),
-            nn.Dropout(0.1),
-        )
-        self.layernorm1 = nn.LayerNorm(sub_channel1 * 2)
-        self.conv11 = torch.nn.Sequential(
-            nn.Conv1d(1, out_channels=sub_channel1, kernel_size=8, stride=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool1d(kernel_size=5, stride=4),
-            nn.Dropout(0.1),
-        )
-        self.layernorm11 = nn.LayerNorm(sub_channel1)
-        self.conv12 = torch.nn.Sequential(
-            nn.Conv1d(1, out_channels=sub_channel1, kernel_size=8, stride=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool1d(kernel_size=5, stride=4),
-            nn.Dropout(0.1),
-        )
-        self.layernorm12 = nn.LayerNorm(sub_channel1)
+        if 'seq' in self.multi:
+            self.conv1 = torch.nn.Sequential(
+                nn.Conv1d(4, out_channels=sub_channel1 * 2, kernel_size=8, stride=1),
+                nn.ReLU(inplace=True),
+                nn.MaxPool1d(kernel_size=5, stride=4),
+                nn.Dropout(0.1),
+            )
+            self.layernorm1 = nn.LayerNorm(sub_channel1 * 2)
+        if 'open' in self.multi:
+            self.conv11 = torch.nn.Sequential(
+                nn.Conv1d(1, out_channels=sub_channel1, kernel_size=8, stride=1),
+                nn.ReLU(inplace=True),
+                nn.MaxPool1d(kernel_size=5, stride=4),
+                nn.Dropout(0.1),
+            )
+            self.layernorm11 = nn.LayerNorm(sub_channel1)
+        if 'loop' in self.multi:
+            self.conv12 = torch.nn.Sequential(
+                nn.Conv1d(1, out_channels=sub_channel1, kernel_size=8, stride=1),
+                nn.ReLU(inplace=True),
+                nn.MaxPool1d(kernel_size=5, stride=4),
+                nn.Dropout(0.1),
+            )
+            self.layernorm12 = nn.LayerNorm(sub_channel1)
         self.conv = torch.nn.Sequential(
             nn.Conv1d(channel1, out_channels=channel1, kernel_size=1, stride=1),
             nn.ReLU(inplace=True),
@@ -162,22 +165,25 @@ class Decoder1(nn.Module):
     def __init__(self, multi, channel5):
         super().__init__()
         self.multi = multi
-        self.convt1 = nn.Sequential(
-            nn.Upsample(scale_factor=4, mode='linear'),
-            nn.ConvTranspose1d(channel5, 4, kernel_size=9, stride=1),
-            nn.BatchNorm1d(4),
-            nn.Sigmoid(),
-        )
-        self.convt11 = nn.Sequential(
-            nn.Upsample(scale_factor=4, mode='linear'),
-            nn.ConvTranspose1d(channel5, 1, kernel_size=9, stride=1),
-            nn.ReLU(inplace=True),
-        )
-        self.convt12 = nn.Sequential(
-            nn.Upsample(scale_factor=4, mode='linear'),
-            nn.ConvTranspose1d(channel5, 1, kernel_size=9, stride=1),
-            nn.ReLU(inplace=True),
-        )
+        if 'seq' in self.multi:
+            self.convt1 = nn.Sequential(
+                nn.Upsample(scale_factor=4, mode='linear'),
+                nn.ConvTranspose1d(channel5, 4, kernel_size=9, stride=1),
+                nn.BatchNorm1d(4),
+                nn.Sigmoid(),
+            )
+        if 'open' in self.multi:
+            self.convt11 = nn.Sequential(
+                nn.Upsample(scale_factor=4, mode='linear'),
+                nn.ConvTranspose1d(channel5, 1, kernel_size=9, stride=1),
+                nn.ReLU(inplace=True),
+            )
+        if 'loop' in self.multi:
+            self.convt12 = nn.Sequential(
+                nn.Upsample(scale_factor=4, mode='linear'),
+                nn.ConvTranspose1d(channel5, 1, kernel_size=9, stride=1),
+                nn.ReLU(inplace=True),
+            )
 
     def forward(self, out):
         decs = []
@@ -241,7 +247,7 @@ class VQVAE(nn.Module):
 
 # CREATE
 class create(nn.Module):
-    def __init__(self, num_class=5, multi=['seq','open','loop'], channel1=256, channel2=256, channel3=128, channel4=300, channel5=300, embed_dim=128, n_embed=200, split=16, ema=True, e_loss_weight=0.25, mu=0.01):
+    def __init__(self, num_class=5, multi=['seq','open','loop'], channel1=512, channel2=384, channel3=128, channel4=200, channel5=200, embed_dim=128, n_embed=200, split=16, ema=True, e_loss_weight=0.25, mu=0.01):
         super().__init__()
         self.vqvae = VQVAE(multi=multi, channel1=channel1, channel2=channel2, channel3=channel3, channel4=channel4, channel5=channel5, embed_dim=embed_dim, n_embed=n_embed, split=split, ema=ema, e_loss_weight=e_loss_weight, mu=mu)
 
